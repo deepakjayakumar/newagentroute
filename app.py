@@ -121,7 +121,7 @@ st.markdown(
 
     textarea {
         background: #f8f9fb !important;
-        color: #1a1a2e !important;
+        color: #000000 !important;
         font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
         font-size: 0.85rem !important;
         border-radius: 10px !important;
@@ -287,7 +287,7 @@ if st.session_state.running:
         for i in range(0, len(file_content), chunk_size):
             log += file_content[i : i + chunk_size]
             log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
-            time.sleep(0.05)
+            time.sleep(0.006)
     else:
         log += "⚠️ Optimization_Process.txt not found. Skipping detailed log.\n"
         log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
