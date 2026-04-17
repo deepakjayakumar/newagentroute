@@ -25,28 +25,151 @@ ORDER_TABLE_HEADERS = ["Order ID", "Store ID", "Date", "Quantity", "Product", "S
 st.set_page_config(page_title="Agentic AI Supply Chain PoC", layout="wide")
 
 st.markdown(
-    f"""
+    """
     <style>
-    .main-header {{
-        color: {COCA_COLA_RED};
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+
+    html, body, [class*="st-"] {
+        font-family: 'Inter', sans-serif;
+    }
+    .block-container { padding-top: 2rem; }
+
+    .hero-banner {
+        background: linear-gradient(135deg, #CC0000 0%, #8B0000 60%, #1a1a2e 100%);
+        border-radius: 16px;
+        padding: 2.5rem 3rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        box-shadow: 0 8px 32px rgba(204, 0, 0, 0.25);
+    }
+    .hero-title {
+        color: #ffffff;
         font-weight: 900;
+        font-size: 2.8rem;
+        letter-spacing: -0.5px;
+        margin: 0;
+        text-align: center;
+    }
+    .hero-subtitle {
+        color: rgba(255,255,255,0.8);
+        font-size: 1.1rem;
+        font-weight: 400;
+        margin-top: 0.5rem;
+        text-align: center;
+    }
+
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid #e8e8e8;
+        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .metric-value {
         font-size: 2rem;
-        margin-bottom: 0;
-    }}
-    .section-border {{
-        border: 2px solid {COCA_COLA_RED};
+        font-weight: 800;
+        color: #CC0000;
+        margin: 0;
+    }
+    .metric-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 0;
+    }
+
+    .section-card {
+        background: #ffffff;
+        border: 1px solid #e8e8e8;
+        border-radius: 14px;
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    }
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .section-title .icon {
+        background: #CC0000;
+        color: white;
+        width: 32px;
+        height: 32px;
         border-radius: 8px;
-        padding: 16px;
-        margin-bottom: 16px;
-    }}
-    .status-new {{ color: {COCA_COLA_RED}; font-weight: bold; }}
-    .status-assigned {{ color: #008000; font-weight: bold; }}
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+    }
+
+    div[data-testid="stDataFrame"] {
+        border: 1px solid #f0f0f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    textarea {
+        background: #0d1117 !important;
+        color: #58a6ff !important;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+        font-size: 0.85rem !important;
+        border-radius: 10px !important;
+        border: 1px solid #21262d !important;
+    }
+
+    .stButton > button {
+        background: linear-gradient(135deg, #CC0000, #990000);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        border-radius: 10px;
+        padding: 0.7rem 2.5rem;
+        letter-spacing: 0.5px;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 15px rgba(204, 0, 0, 0.3);
+    }
+    .stButton > button:hover {
+        background: linear-gradient(135deg, #e60000, #b30000);
+        box-shadow: 0 6px 20px rgba(204, 0, 0, 0.45);
+        transform: translateY(-1px);
+    }
+
+    .status-badge-new {
+        background: #fff3f3; color: #CC0000;
+        padding: 3px 10px; border-radius: 20px;
+        font-weight: 600; font-size: 0.8rem;
+    }
+    .status-badge-assigned {
+        background: #f0fff4; color: #008000;
+        padding: 3px 10px; border-radius: 20px;
+        font-weight: 600; font-size: 0.8rem;
+    }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-st.markdown('<p class="main-header">Agentic AI for Delivery Execution</p>', unsafe_allow_html=True)
+st.markdown(
+    """
+    <div class="hero-banner">
+        <p class="hero-title">Agentic AI for Delivery Execution</p>
+        <p class="hero-subtitle">Coca-Cola Supply Chain &mdash; Intelligent Order Routing &amp; Dispatch</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 def get_orders():
@@ -83,21 +206,39 @@ def read_optimization_file():
 if "orders_df" not in st.session_state:
     st.session_state.orders_df = pd.DataFrame(columns=ORDER_TABLE_HEADERS)
 if "log_text" not in st.session_state:
-    st.session_state.log_text = "--- Click '▶️ Run Agent' to load orders and begin execution. ---"
+    st.session_state.log_text = "--- Click 'Run Agent' to load orders and begin execution. ---"
 if "running" not in st.session_state:
     st.session_state.running = False
 
-if st.button("▶️ Run Agent"):
-    st.session_state.running = True
+order_count = len(st.session_state.orders_df)
+assigned_count = int((st.session_state.orders_df["Status"] == "Assigned").sum()) if order_count > 0 else 0
+pending_count = order_count - assigned_count
 
-st.markdown('<div class="section-border">', unsafe_allow_html=True)
-st.subheader("📦 ORDER STATUS")
+m1, m2, m3, m4 = st.columns(4)
+with m1:
+    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Total Orders</p></div>'.format(order_count), unsafe_allow_html=True)
+with m2:
+    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Pending</p></div>'.format(pending_count), unsafe_allow_html=True)
+with m3:
+    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Assigned</p></div>'.format(assigned_count), unsafe_allow_html=True)
+with m4:
+    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Success Rate</p></div>'.format("{}%".format(round(assigned_count / order_count * 100)) if order_count > 0 else "--"), unsafe_allow_html=True)
+
+st.write("")
+
+_, btn_col, _ = st.columns([1, 1, 1])
+with btn_col:
+    if st.button("Run Agent", use_container_width=True):
+        st.session_state.running = True
+
+st.write("")
+
+st.markdown('<div class="section-card"><div class="section-title"><span class="icon">&#128230;</span> Order Status</div>', unsafe_allow_html=True)
 orders_placeholder = st.empty()
 orders_placeholder.dataframe(st.session_state.orders_df, use_container_width=True, hide_index=True)
 st.markdown("</div>", unsafe_allow_html=True)
 
-st.markdown('<div class="section-border">', unsafe_allow_html=True)
-st.subheader("🤖 AGENT PROCESSING LOG")
+st.markdown('<div class="section-card"><div class="section-title"><span class="icon">&#129302;</span> Agent Processing Log</div>', unsafe_allow_html=True)
 log_placeholder = st.empty()
 log_placeholder.text_area("Transparent Execution Flow", value=st.session_state.log_text, height=400, disabled=True)
 st.markdown("</div>", unsafe_allow_html=True)
