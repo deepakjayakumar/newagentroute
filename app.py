@@ -177,7 +177,7 @@ def get_orders():
     cur.execute(
         "SELECT ORDER_ID, STORE_ID, TO_VARCHAR(ORDER_DATE,'YYYY-MM-DD') AS ORDER_DATE, "
         "QUANTITY, PRODUCT_NAME "
-        "FROM COCA_COLA_SUPPLY_CHAIN.AGENT.ORDER_DETAILS_NEW "
+        "FROM COCA_COLA_SUPPLY_CHAIN.AGENT.ORDER_DETAILS "
         "WHERE ORDER_STATUS = 'Pending' LIMIT 20"
     )
     df = cur.fetch_pandas_all()
@@ -207,7 +207,7 @@ def read_optimization_file():
 def get_pending_count():
     cur = conn.cursor()
     cur.execute(
-        "SELECT COUNT(*) FROM COCA_COLA_SUPPLY_CHAIN.AGENT.ORDER_DETAILS_NEW "
+        "SELECT COUNT(*) FROM COCA_COLA_SUPPLY_CHAIN.AGENT.ORDER_DETAILS "
         "WHERE ORDER_STATUS = 'Pending'"
     )
     return cur.fetchone()[0]
