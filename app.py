@@ -120,12 +120,12 @@ st.markdown(
     }
 
     textarea {
-        background: #0d1117 !important;
-        color: #58a6ff !important;
+        background: #f8f9fb !important;
+        color: #1a1a2e !important;
         font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
         font-size: 0.85rem !important;
         border-radius: 10px !important;
-        border: 1px solid #21262d !important;
+        border: 1px solid #dde1e6 !important;
     }
 
     .stButton > button {
@@ -203,6 +203,18 @@ def read_optimization_file():
         return None
 
 
+@st.cache_data(ttl=300)
+def get_pending_count():
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT COUNT(*) FROM COCA_COLA_SUPPLY_CHAIN.AGENT.ORDER_DETAILS_NEW "
+        "WHERE ORDER_STATUS = 'Pending'"
+    )
+    return cur.fetchone()[0]
+
+
+total_pending = get_pending_count()
+
 if "orders_df" not in st.session_state:
     st.session_state.orders_df = pd.DataFrame(columns=ORDER_TABLE_HEADERS)
 if "log_text" not in st.session_state:
@@ -212,17 +224,18 @@ if "running" not in st.session_state:
 
 order_count = len(st.session_state.orders_df)
 assigned_count = int((st.session_state.orders_df["Status"] == "Assigned").sum()) if order_count > 0 else 0
-pending_count = order_count - assigned_count
+pending_display = total_pending if order_count == 0 else order_count - assigned_count
+total_display = total_pending if order_count == 0 else order_count
 
 m1, m2, m3, m4 = st.columns(4)
 with m1:
-    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Total Orders</p></div>'.format(order_count), unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Total Orders</p></div>'.format(total_display), unsafe_allow_html=True)
 with m2:
-    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Pending</p></div>'.format(pending_count), unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Pending</p></div>'.format(pending_display), unsafe_allow_html=True)
 with m3:
     st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Assigned</p></div>'.format(assigned_count), unsafe_allow_html=True)
 with m4:
-    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Success Rate</p></div>'.format("{}%".format(round(assigned_count / order_count * 100)) if order_count > 0 else "--"), unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Success Rate</p></div>'.format("{}%".format(round(assigned_count / total_display * 100)) if total_display > 0 else "0%"), unsafe_allow_html=True)
 
 st.write("")
 
