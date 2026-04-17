@@ -156,6 +156,10 @@ st.markdown(
         padding: 3px 10px; border-radius: 20px;
         font-weight: 600; font-size: 0.8rem;
     }
+
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
     </style>
     """,
     unsafe_allow_html=True,
@@ -300,3 +304,5 @@ if st.session_state.running:
     log += "\n✅ Final assignments complete. Order statuses updated."
     st.session_state.log_text = log
     log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    time.sleep(1)
+    st.rerun()
