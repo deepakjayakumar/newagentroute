@@ -1,9 +1,23 @@
 import streamlit as st
 import pandas as pd
 import time
-from snowflake.snowpark.context import get_active_session
+import snowflake.connector
 
-session = get_active_session()
+
+@st.cache_resource
+def get_connection():
+    return snowflake.connector.connect(
+        account=st.secrets["snowflake"]["account"],
+        user=st.secrets["snowflake"]["user"],
+        password=st.secrets["snowflake"]["password"],
+        warehouse=st.secrets["snowflake"]["warehouse"],
+        database=st.secrets["snowflake"]["database"],
+        schema=st.secrets["snowflake"]["schema"],
+        role=st.secrets["snowflake"].get("role", "ACCOUNTADMIN"),
+    )
+
+
+conn = get_connection()
 
 COCA_COLA_RED = "#CC0000"
 ORDER_TABLE_HEADERS = ["Order ID", "Store ID", "Date", "Quantity", "Product", "Status"]
@@ -36,12 +50,14 @@ st.markdown('<p class="main-header">Agentic AI for Delivery Execution</p>', unsa
 
 
 def get_orders():
-    df = session.sql(
+    cur = conn.cursor()
+    cur.execute(
         "SELECT ORDER_ID, STORE_ID, TO_VARCHAR(ORDER_DATE,'YYYY-MM-DD') AS ORDER_DATE, "
         "QUANTITY, PRODUCT_NAME "
         "FROM COCA_COLA_SUPPLY_CHAIN.AGENT.ORDER_DETAILS_NEW "
         "WHERE ORDER_STATUS = 'Pending' LIMIT 20"
-    ).to_pandas()
+    )
+    df = cur.fetch_pandas_all()
     df.columns = ORDER_TABLE_HEADERS[:5]
     df["Status"] = "New Order"
     return df
@@ -49,10 +65,12 @@ def get_orders():
 
 def read_optimization_file():
     try:
-        df = session.sql(
+        cur = conn.cursor()
+        cur.execute(
             "SELECT $1 AS line FROM @COCA_COLA_SUPPLY_CHAIN.AGENT.STREAMLIT_STAGE/Optimization_Process.txt"
-        ).to_pandas()
-        return "\n".join(df["LINE"].tolist())
+        )
+        df = cur.fetch_pandas_all()
+        return "\n".join(df.iloc[:, 0].tolist())
     except Exception:
         pass
     try:
