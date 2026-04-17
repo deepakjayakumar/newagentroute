@@ -120,12 +120,13 @@ st.markdown(
     }
 
     textarea {
-        background: #f8f9fb !important;
+        background: #ffffff !important;
         color: #000000 !important;
         font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
-        font-size: 0.85rem !important;
+        font-size: 0.9rem !important;
         border-radius: 10px !important;
         border: 1px solid #dde1e6 !important;
+        line-height: 1.6 !important;
     }
 
     .stButton > button {
@@ -283,11 +284,11 @@ if st.session_state.running:
 
     file_content = read_optimization_file()
     if file_content:
-        chunk_size = 80
+        chunk_size = 15
         for i in range(0, len(file_content), chunk_size):
             log += file_content[i : i + chunk_size]
             log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
-            time.sleep(0.006)
+            time.sleep(0.12)
     else:
         log += "⚠️ Optimization_Process.txt not found. Skipping detailed log.\n"
         log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
