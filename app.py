@@ -127,6 +127,8 @@ st.markdown(
         border-radius: 10px !important;
         border: 1px solid #dde1e6 !important;
         line-height: 1.6 !important;
+        -webkit-text-fill-color: #000000 !important;
+        opacity: 1 !important;
     }
 
     .stButton > button {
@@ -301,6 +303,37 @@ if st.session_state.running:
     orders_df["Status"] = "Assigned"
     st.session_state.orders_df = orders_df
     orders_placeholder.dataframe(orders_df, use_container_width=True, hide_index=True)
+
+    cur = conn.cursor()
+    cur.execute("DELETE FROM COCA_COLA_SUPPLY_CHAIN.AGENT.DRIVER_ASSIGNMENT")
+    cur.execute("""
+        INSERT INTO COCA_COLA_SUPPLY_CHAIN.AGENT.DRIVER_ASSIGNMENT
+            (DRIVER_NAME, STORE_NAME, STORE_CITY, DISTANCE_KM, ORDER_ID, TOTAL_WEIGHT_KG)
+        VALUES
+            ('Peter Pan',   'Desert Mart',           'Phoenix',     6.2, 1001,  92),
+            ('Peter Pan',   'Desert Mart',           'Phoenix',     6.2, 1010,  48),
+            ('Peter Pan',   'Desert Mart',           'Phoenix',     6.2, 1019,  52),
+            ('Peter Pan',   'Canyon Corner',         'Tucson',    170.7, 1002,  80),
+            ('Peter Pan',   'Canyon Corner',         'Tucson',    170.7, 1011,  90),
+            ('Peter Pan',   'Canyon Corner',         'Tucson',    170.7, 1017,  45),
+            ('Peter Pan',   'Cactus Corner Store',   'Scottsdale', 14.6, 1006,  65),
+            ('Peter Pan',   'Canyon Beverages',      'Tempe',      12.7, 1014,  25),
+            ('James Bond',  'Sunrise Market',        'Gilbert',    28.5, 1003, 107),
+            ('James Bond',  'Sunrise Market',        'Gilbert',    28.5, 1009,  73),
+            ('James Bond',  'Sunrise Market',        'Gilbert',    28.5, 1016,  60),
+            ('James Bond',  'Saguaro Supply',        'Chandler',   26.8, 1008,  55),
+            ('James Bond',  'Sunbelt Grocers',       'Mesa',       22.8, 1007,  38),
+            ('John Doe',    'Copper Basin Grocers',  'Peoria',     21.1, 1004,  42),
+            ('John Doe',    'Copper Basin Grocers',  'Peoria',     21.1, 1012,  34),
+            ('John Doe',    'Copper Basin Grocers',  'Peoria',     21.1, 1020,  68),
+            ('John Doe',    'Red Rock Provisions',   'Glendale',   14.4, 1015,  88),
+            ('Jane Smith',  'Valley Fresh Supply',   'Surprise',   33.9, 1005, 122),
+            ('Jane Smith',  'Valley Fresh Supply',   'Surprise',   33.9, 1013, 110),
+            ('Jane Smith',  'Valley Fresh Supply',   'Surprise',   33.9, 1018,  77)
+    """)
+
+    log += "✅ Driver assignments saved to DRIVER_ASSIGNMENT table.\n"
+    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
 
     log += "\n✅ Final assignments complete. Order statuses updated."
     st.session_state.log_text = log
