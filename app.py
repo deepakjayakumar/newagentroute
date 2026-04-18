@@ -248,7 +248,7 @@ st.write("")
 
 _, btn_col, _ = st.columns([1, 1, 1])
 with btn_col:
-    if st.button("Run Agent", use_container_width=True):
+    if st.button("Trigger Agent", use_container_width=True):
         st.session_state.running = True
 
 st.write("")
