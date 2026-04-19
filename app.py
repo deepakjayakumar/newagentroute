@@ -242,15 +242,28 @@ else:
     total_display = 0
     assigned_count = 0
 
+
+def render_metrics(total, pending, assigned):
+    fulfillment = "{}%".format(round(assigned / total * 100)) if total > 0 else "0%"
+    return (
+        '<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Total Orders</p></div>'.format(total),
+        '<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Pending</p></div>'.format(pending),
+        '<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Assigned</p></div>'.format(assigned),
+        '<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Fulfillment Rate</p></div>'.format(fulfillment),
+    )
+
+
 m1, m2, m3, m4 = st.columns(4)
-with m1:
-    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Total Orders</p></div>'.format(total_display), unsafe_allow_html=True)
-with m2:
-    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Pending</p></div>'.format(pending_display), unsafe_allow_html=True)
-with m3:
-    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Assigned</p></div>'.format(assigned_count), unsafe_allow_html=True)
-with m4:
-    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Fulfillment Rate</p></div>'.format("{}%".format(round(assigned_count / total_display * 100)) if total_display > 0 else "0%"), unsafe_allow_html=True)
+metric_ph1 = m1.empty()
+metric_ph2 = m2.empty()
+metric_ph3 = m3.empty()
+metric_ph4 = m4.empty()
+
+html1, html2, html3, html4 = render_metrics(total_display, pending_display, assigned_count)
+metric_ph1.markdown(html1, unsafe_allow_html=True)
+metric_ph2.markdown(html2, unsafe_allow_html=True)
+metric_ph3.markdown(html3, unsafe_allow_html=True)
+metric_ph4.markdown(html4, unsafe_allow_html=True)
 
 st.write("")
 
@@ -278,6 +291,13 @@ if st.session_state.running:
     orders_df = get_orders()
     st.session_state.orders_df = orders_df
     orders_placeholder.dataframe(orders_df, use_container_width=True, hide_index=True)
+
+    num_orders = len(orders_df)
+    html1, html2, html3, html4 = render_metrics(num_orders, num_orders, 0)
+    metric_ph1.markdown(html1, unsafe_allow_html=True)
+    metric_ph2.markdown(html2, unsafe_allow_html=True)
+    metric_ph3.markdown(html3, unsafe_allow_html=True)
+    metric_ph4.markdown(html4, unsafe_allow_html=True)
 
     log = "--- AGENT LOG ---\n"
 
@@ -312,6 +332,12 @@ if st.session_state.running:
     orders_df["Status"] = "Assigned"
     st.session_state.orders_df = orders_df
     orders_placeholder.dataframe(orders_df, use_container_width=True, hide_index=True)
+
+    html1, html2, html3, html4 = render_metrics(num_orders, 0, num_orders)
+    metric_ph1.markdown(html1, unsafe_allow_html=True)
+    metric_ph2.markdown(html2, unsafe_allow_html=True)
+    metric_ph3.markdown(html3, unsafe_allow_html=True)
+    metric_ph4.markdown(html4, unsafe_allow_html=True)
 
     cur = conn.cursor()
     cur.execute("DELETE FROM COCA_COLA_SUPPLY_CHAIN.AGENT.DRIVER_ASSIGNMENT")
