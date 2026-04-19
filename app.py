@@ -228,11 +228,19 @@ if "log_text" not in st.session_state:
     st.session_state.log_text = "--- Click 'Run Agent' to load orders and begin execution. ---"
 if "running" not in st.session_state:
     st.session_state.running = False
+if "agent_triggered" not in st.session_state:
+    st.session_state.agent_triggered = False
 
 order_count = len(st.session_state.orders_df)
 assigned_count = int((st.session_state.orders_df["Status"] == "Assigned").sum()) if order_count > 0 else 0
-pending_display = total_pending if order_count == 0 else order_count - assigned_count
-total_display = total_pending if order_count == 0 else order_count
+
+if st.session_state.agent_triggered:
+    pending_display = total_pending if order_count == 0 else order_count - assigned_count
+    total_display = total_pending if order_count == 0 else order_count
+else:
+    pending_display = 0
+    total_display = 0
+    assigned_count = 0
 
 m1, m2, m3, m4 = st.columns(4)
 with m1:
@@ -250,6 +258,7 @@ _, btn_col, _ = st.columns([1, 1, 1])
 with btn_col:
     if st.button("Trigger Agent", use_container_width=True):
         st.session_state.running = True
+        st.session_state.agent_triggered = True
 
 st.write("")
 
