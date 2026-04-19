@@ -242,7 +242,7 @@ with m2:
 with m3:
     st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Assigned</p></div>'.format(assigned_count), unsafe_allow_html=True)
 with m4:
-    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Success Rate</p></div>'.format("{}%".format(round(assigned_count / total_display * 100)) if total_display > 0 else "0%"), unsafe_allow_html=True)
+    st.markdown('<div class="metric-card"><p class="metric-value">{}</p><p class="metric-label">Fulfillment Rate</p></div>'.format("{}%".format(round(assigned_count / total_display * 100)) if total_display > 0 else "0%"), unsafe_allow_html=True)
 
 st.write("")
 
