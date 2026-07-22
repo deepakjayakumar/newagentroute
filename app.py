@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import time
 import snowflake.connector
@@ -119,6 +120,7 @@ st.markdown(
         overflow: hidden;
     }
 
+    /* Updated Textarea CSS to preserve scrolling while preventing editing */
     textarea {
         background: #ffffff !important;
         color: #000000 !important;
@@ -129,6 +131,8 @@ st.markdown(
         line-height: 1.6 !important;
         -webkit-text-fill-color: #000000 !important;
         opacity: 1 !important;
+        overflow-y: auto !important; /* Ensure vertical scrollbar works */
+        pointer-events: auto !important; /* Allow user interaction/scrolling */
     }
 
     .stButton > button {
@@ -167,6 +171,23 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+
+# Helper function to update the text log and automatically scroll to the bottom
+def update_log(log_text):
+    log_placeholder.text_area("Transparent Execution Flow", value=log_text, height=400, disabled=True)
+    components.html(
+        """
+        <script>
+            var textareas = window.parent.document.querySelectorAll('textarea');
+            textareas.forEach(function(textarea) {
+                textarea.scrollTop = textarea.scrollHeight;
+            });
+        </script>
+        """,
+        height=0,
+    )
+
 
 st.markdown(
     """
@@ -302,15 +323,15 @@ if st.session_state.running:
     log = "--- AGENT LOG ---\n"
 
     log += " 🟢 Agent Initializing...\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    update_log(log)
     time.sleep(1)
 
     log += " 📊 Gathering Data from Snowflake (4 tables)...\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    update_log(log)
     time.sleep(1)
 
     log += " 🧠 Running Optimization Algorithm...\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    update_log(log)
     time.sleep(1)
 
     file_content = read_optimization_file()
@@ -318,14 +339,14 @@ if st.session_state.running:
         chunk_size = 15
         for i in range(0, len(file_content), chunk_size):
             log += file_content[i : i + chunk_size]
-            log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+            update_log(log)
             time.sleep(0.12)
     else:
         log += "⚠️ Optimization_Process.txt not found. Skipping detailed log.\n"
-        log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+        update_log(log)
 
     log += f"\n✅ All {len(orders_df)} orders processed. Assignment complete.\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    update_log(log)
     time.sleep(1)
 
     log += "✅ Assignment Success! Moving Orders to Dispatch Queue.\n"
@@ -345,33 +366,33 @@ if st.session_state.running:
         INSERT INTO COCA_COLA_SUPPLY_CHAIN.AGENT.DRIVER_ASSIGNMENT
             (DRIVER_NAME, STORE_NAME, STORE_CITY, DISTANCE_KM, ORDER_ID, TOTAL_WEIGHT_KG)
         VALUES
-            ('Peter Pan',   'Desert Mart',           'Phoenix',     6.2, 1001,  92),
-            ('Peter Pan',   'Desert Mart',           'Phoenix',     6.2, 1010,  48),
-            ('Peter Pan',   'Desert Mart',           'Phoenix',     6.2, 1019,  52),
-            ('Peter Pan',   'Canyon Corner',         'Tucson',    170.7, 1002,  80),
-            ('Peter Pan',   'Canyon Corner',         'Tucson',    170.7, 1011,  90),
-            ('Peter Pan',   'Canyon Corner',         'Tucson',    170.7, 1017,  45),
-            ('Peter Pan',   'Cactus Corner Store',   'Scottsdale', 14.6, 1006,  65),
-            ('Peter Pan',   'Canyon Beverages',      'Tempe',      12.7, 1014,  25),
-            ('James Bond',  'Sunrise Market',        'Gilbert',    28.5, 1003, 107),
-            ('James Bond',  'Sunrise Market',        'Gilbert',    28.5, 1009,  73),
-            ('James Bond',  'Sunrise Market',        'Gilbert',    28.5, 1016,  60),
-            ('James Bond',  'Saguaro Supply',        'Chandler',   26.8, 1008,  55),
-            ('James Bond',  'Sunbelt Grocers',       'Mesa',       22.8, 1007,  38),
-            ('John Doe',    'Copper Basin Grocers',  'Peoria',     21.1, 1004,  42),
-            ('John Doe',    'Copper Basin Grocers',  'Peoria',     21.1, 1012,  34),
-            ('John Doe',    'Copper Basin Grocers',  'Peoria',     21.1, 1020,  68),
-            ('John Doe',    'Red Rock Provisions',   'Glendale',   14.4, 1015,  88),
-            ('Jane Smith',  'Valley Fresh Supply',   'Surprise',   33.9, 1005, 122),
-            ('Jane Smith',  'Valley Fresh Supply',   'Surprise',   33.9, 1013, 110),
-            ('Jane Smith',  'Valley Fresh Supply',   'Surprise',   33.9, 1018,  77)
+            ('Peter Pan',   'Desert Mart',          'Phoenix',     6.2, 1001,  92),
+            ('Peter Pan',   'Desert Mart',          'Phoenix',     6.2, 1010,  48),
+            ('Peter Pan',   'Desert Mart',          'Phoenix',     6.2, 1019,  52),
+            ('Peter Pan',   'Canyon Corner',        'Tucson',    170.7, 1002,  80),
+            ('Peter Pan',   'Canyon Corner',        'Tucson',    170.7, 1011,  90),
+            ('Peter Pan',   'Canyon Corner',        'Tucson',    170.7, 1017,  45),
+            ('Peter Pan',   'Cactus Corner Store',  'Scottsdale', 14.6, 1006,  65),
+            ('Peter Pan',   'Canyon Beverages',     'Tempe',      12.7, 1014,  25),
+            ('James Bond',  'Sunrise Market',       'Gilbert',    28.5, 1003, 107),
+            ('James Bond',  'Sunrise Market',       'Gilbert',    28.5, 1009,  73),
+            ('James Bond',  'Sunrise Market',       'Gilbert',    28.5, 1016,  60),
+            ('James Bond',  'Saguaro Supply',       'Chandler',   26.8, 1008,  55),
+            ('James Bond',  'Sunbelt Grocers',      'Mesa',       22.8, 1007,  38),
+            ('John Doe',    'Copper Basin Grocers', 'Peoria',     21.1, 1004,  42),
+            ('John Doe',    'Copper Basin Grocers', 'Peoria',     21.1, 1012,  34),
+            ('John Doe',    'Copper Basin Grocers', 'Peoria',     21.1, 1020,  68),
+            ('John Doe',    'Red Rock Provisions',  'Glendale',   14.4, 1015,  88),
+            ('Jane Smith',  'Valley Fresh Supply',  'Surprise',   33.9, 1005, 122),
+            ('Jane Smith',  'Valley Fresh Supply',  'Surprise',   33.9, 1013, 110),
+            ('Jane Smith',  'Valley Fresh Supply',  'Surprise',   33.9, 1018,  77)
     """)
 
     log += "✅ Driver assignments saved to DRIVER_ASSIGNMENT table.\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    update_log(log)
 
     log += "\n✅ Final assignments complete. Order statuses updated."
     st.session_state.log_text = log
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    update_log(log)
     time.sleep(1)
     st.rerun()
