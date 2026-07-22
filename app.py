@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import time
+import html
+import streamlit.components.v1 as components
 import snowflake.connector
 
 
@@ -281,8 +283,26 @@ orders_placeholder.dataframe(st.session_state.orders_df, use_container_width=Tru
 st.markdown("</div>", unsafe_allow_html=True)
 
 st.markdown('<div class="section-card"><div class="section-title"><span class="icon">&#129302;</span> Agent Processing Log</div>', unsafe_allow_html=True)
-log_placeholder = st.empty()
-log_placeholder.text_area("Transparent Execution Flow", value=st.session_state.log_text, height=400, disabled=True)
+
+def render_log(log_text, height=400):
+        safe = html.escape(log_text)
+        html_code = f"""
+        <div id="log_container" style="height:100%; width:100%; box-sizing:border-box; padding:12px; background:#ffffff; overflow:auto; font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size:0.9rem; border-radius:10px; border:1px solid #dde1e6;">
+            <pre style="white-space:pre-wrap; margin:0;">{safe}</pre>
+        </div>
+        <script>
+            (function() {{
+                const c = document.getElementById('log_container');
+                if (c) {{
+                    c.scrollTop = c.scrollHeight;
+                }}
+            }})();
+        </script>
+        """
+        components.html(html_code, height=height, scrolling=False, key="log_component")
+
+render_log(st.session_state.log_text)
+
 st.markdown("</div>", unsafe_allow_html=True)
 
 if st.session_state.running:
@@ -302,11 +322,11 @@ if st.session_state.running:
     log = "--- AGENT LOG ---\n"
 
     log += " 🟢 Agent Initializing...\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    render_log(log)
     time.sleep(1)
 
     log += " 📊 Gathering Data from Snowflake (4 tables)...\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    render_log(log)
     time.sleep(1)
 
     log += " 🧠 Running Optimization Algorithm...\n"
@@ -318,14 +338,14 @@ if st.session_state.running:
         chunk_size = 15
         for i in range(0, len(file_content), chunk_size):
             log += file_content[i : i + chunk_size]
-            log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+            render_log(log)
             time.sleep(0.12)
     else:
         log += "⚠️ Optimization_Process.txt not found. Skipping detailed log.\n"
-        log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+        render_log(log)
 
     log += f"\n✅ All {len(orders_df)} orders processed. Assignment complete.\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    render_log(log)
     time.sleep(1)
 
     log += "✅ Assignment Success! Moving Orders to Dispatch Queue.\n"
@@ -368,10 +388,10 @@ if st.session_state.running:
     """)
 
     log += "✅ Driver assignments saved to DRIVER_ASSIGNMENT table.\n"
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    render_log(log)
 
     log += "\n✅ Final assignments complete. Order statuses updated."
     st.session_state.log_text = log
-    log_placeholder.text_area("Transparent Execution Flow", value=log, height=400, disabled=True)
+    render_log(log)
     time.sleep(1)
     st.rerun()
